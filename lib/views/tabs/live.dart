@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:owl_live_stats/models/match.dart';
+import 'package:owl_live_stats/models/teams.dart';
+import 'package:owl_live_stats/models/players.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:async_loader/async_loader.dart';
@@ -16,21 +18,42 @@ class LiveTabWidget extends StatefulWidget
 }
 
 class LiveTabState extends State<LiveTabWidget> {
+  var network = new Net(environment);
   var singleton = Singleton();
   Match currentMatch;
+  Map<String, dynamic> teams;
+  Map<String, dynamic> players;
   BuildContext context;
 
   getData() {
 //    currentMatch = Match.fromJson(json.decode(Singleton().currentMatch));
     currentMatch = singleton.currentMatch;
+    teams = singleton.teams.teams;
+    players = singleton.players.players;
   }
 
   fetchMatch() async {
-    await new Net(environment).match();
+    await network.match();
+  }
+
+  fetchTeams(Map<String, String> params) async {
+    await network.teams(params);
+  }
+
+  fetchPlayers(Map<String, String> params) async {
+    await network.players(params);
+  }
+
+  playersIdsAsString() {
+    return singleton.currentMatch.seen_players.reduce((p, e) =>
+          p..addAll(e)
+        ).join(',');
   }
 
   process() async {
     await fetchMatch();
+    await fetchTeams({'foo': 'bar'});
+    await fetchPlayers({'id': playersIdsAsString()});
     getData();
   }
 
@@ -38,7 +61,7 @@ class LiveTabState extends State<LiveTabWidget> {
     super.initState();
     const oneSec = const Duration(seconds:5);
     new Timer.periodic(oneSec, (Timer t) => setState(() {
-      process();
+      fetchMatch();
     }));
   }
 
@@ -145,7 +168,7 @@ class LiveTabState extends State<LiveTabWidget> {
             ),
           ),
           child: new Text(
-            "2-1",
+            _calculateGlobalScore(),
             style: new TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 30.0,
@@ -155,6 +178,14 @@ class LiveTabState extends State<LiveTabWidget> {
         ),
       ),
     );
+  }
+
+  _calculateGlobalScore() {
+    var score = [0,0];
+    currentMatch.maps.forEach((el) {
+      el[0] > el[1] ? score[0] += 1 : score[1] += 1;
+    });
+    return score.join("-"); 
   }
 
   _currentScore() {
@@ -177,7 +208,7 @@ class LiveTabState extends State<LiveTabWidget> {
             borderRadius: BorderRadius.all(Radius.circular(6.0)),
           ),
           child: new Text(
-            "0-2",
+            _calculateCurrentScore(),
             style: new TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20.0,
@@ -187,6 +218,10 @@ class LiveTabState extends State<LiveTabWidget> {
         ),
       ),
     );
+  }
+
+  _calculateCurrentScore() {
+    return currentMatch.maps.last.join("-");
   }
 
   _teamsRow() {
@@ -206,9 +241,9 @@ class LiveTabState extends State<LiveTabWidget> {
               heightFactor: 1.1,
               child: new Column(
                 children: <Widget>[
-                  new Image.asset('images/team-4403-logo.png', height: 150.0, fit: BoxFit.scaleDown ),
+                  new Image.asset(_getTeamsLogos()['first'], height: 150.0, fit: BoxFit.scaleDown ),
                   new Text(
-                    "New York Excelsior",
+                    _getTeamsNames()['first'],
                     style: new TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
@@ -234,9 +269,9 @@ class LiveTabState extends State<LiveTabWidget> {
               heightFactor: 1.1,
               child: new Column(
                 children: <Widget>[
-                  new Image.asset('images/team-4402-logo.png', height: 150.0, fit: BoxFit.scaleDown ),
+                  new Image.asset(_getTeamsLogos()['last'], height: 150.0, fit: BoxFit.scaleDown ),
                   new Text(
-                    "Boston Uprising",
+                    _getTeamsNames()['last'],
                     style: new TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
@@ -250,6 +285,20 @@ class LiveTabState extends State<LiveTabWidget> {
         ),
       ],
     );
+  }
+
+  _getTeamsNames() {
+    return {
+      'first': teams[currentMatch.teams.first.toString()]['name'].toString(),
+      'last': teams[currentMatch.teams.last.toString()]['name'].toString(),
+    };
+  }
+
+  _getTeamsLogos() {
+    return {
+      'first': 'images/team-' + currentMatch.teams.first.toString() + '-logo.png',
+      'last': 'images/team-' + currentMatch.teams.last.toString() + '-logo.png',
+    };
   }
 
   _gamesBar() {
@@ -274,86 +323,95 @@ class LiveTabState extends State<LiveTabWidget> {
   _gamesList() {
     return new Container(
       child: new Column(
-        children: <Widget>[
-          new Column(
-            children: <Widget>[
-              new Container(
-                decoration: new BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: new BorderSide(width: 0.6, color: Colors.grey)
-                  ),
-                ),
-                constraints: new BoxConstraints.expand(
-                  height: Theme.of(context).textTheme.display1.fontSize * 1.3,
-                ),
-                child: new Center(
-                  child: new Text(
-                    "Game 1",
-                    style: new TextStyle(
-                      fontSize: 20.0,
-                      color: Colors.black,
-                      fontFamily: "Alte"
-                    ),
-                  ),
-                ),
-              ),
-              new Container(
-                decoration: new BoxDecoration(
-                  border: Border(
-                    bottom: new BorderSide(width: 1.6, color: Colors.grey)
-                  ),
-                ),
-                child: new Row(
-                  children: <Widget>[
-                    new Expanded(
-                      child: new Center(
-                        child: new Text(
-                          "3",
-                          style: new TextStyle(
-                            fontSize: 50.0,
-                            color: Colors.black,
-                            fontFamily: "Alte"
-                          ),
-                        ),
-                      ),
-                    ),
-                    new Expanded(
-                      child: new Center(
-                        child: new Image.asset("images/map_type_assault.png", width: 40.0)
-                      ),
-                    ),
-                    new Expanded(
-                      child: new Center(
-                        child: new Text(
-                          "1",
-                          style: new TextStyle(
-                            fontSize: 60.0,
-                            color: Colors.black,
-                            fontFamily: "Alte"
-                          ),
-                        )
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              new Container(
-                decoration: new BoxDecoration(
-                  color: Colors.grey,
-                  border: Border(
-                    bottom: new BorderSide(width: 0.6, color: Colors.grey)
-                  ),
-                ),
-                constraints: new BoxConstraints.expand(
-                  height: 15.0,
-                ),
-              ),
-            ],
-          ),
-        ], 
+        children: _gameListItems(), 
       ),
     );
+  }
+
+  _gameListItems() {
+    List<Widget> items = [];
+    var index = 1;
+    currentMatch.maps.forEach((map) {
+      var element = new Column(
+        children: <Widget>[
+          new Container(
+            decoration: new BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                bottom: new BorderSide(width: 0.6, color: Colors.grey)
+              ),
+            ),
+            constraints: new BoxConstraints.expand(
+              height: Theme.of(context).textTheme.display1.fontSize * 1.3,
+            ),
+            child: new Center(
+              child: new Text(
+                "Game " + index.toString(),
+                style: new TextStyle(
+                  fontSize: 20.0,
+                  color: Colors.black,
+                  fontFamily: "Alte"
+                ),
+              ),
+            ),
+          ),
+          new Container(
+            decoration: new BoxDecoration(
+              border: Border(
+                bottom: new BorderSide(width: 1.6, color: Colors.grey)
+              ),
+            ),
+            child: new Row(
+              children: <Widget>[
+                new Expanded(
+                  child: new Center(
+                    child: new Text(
+                      map.first.toString(),
+                      style: new TextStyle(
+                        fontSize: 50.0,
+                        color: Colors.black,
+                        fontFamily: "Alte"
+                      ),
+                    ),
+                  ),
+                ),
+                new Expanded(
+                  child: new Center(
+                    child: new Image.asset("images/map_type_" + currentMatch.map_types[index-1] + ".png", width: 40.0)
+                  ),
+                ),
+                new Expanded(
+                  child: new Center(
+                    child: new Text(
+                      map.last.toString(),
+                      style: new TextStyle(
+                        fontSize: 60.0,
+                        color: Colors.black,
+                        fontFamily: "Alte"
+                      ),
+                    )
+                  ),
+                ),
+              ],
+            ),
+          ),
+          new Container(
+            decoration: new BoxDecoration(
+              color: Colors.grey,
+              border: Border(
+                bottom: new BorderSide(width: 0.6, color: Colors.grey)
+              ),
+            ),
+            constraints: new BoxConstraints.expand(
+              height: 15.0,
+            ),
+          ),
+        ],
+      );
+      items.add(element);
+      index += 1;
+    });
+    return items;
   }
 
   _lineupsBar() {
@@ -377,57 +435,130 @@ class LiveTabState extends State<LiveTabWidget> {
 
   _lineupsList() {
     return new Column(
-      children: <Widget>[
-        new Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            new Container(
-              child: new Row(
-                children: <Widget>[
-                  new Container(
-                    padding: EdgeInsets.only(
-                      left: 12.0
-                    ),
-                    child: new Image.network("https://bnetcmsus-a.akamaihd.net/cms/page_media/9VI2CD4PUER91519254438519.png", width: 50.0)
-                  ),
-                  new Container(
-                    child: new Text(
-                      "Fissure",
-                      style: new TextStyle(
-                        fontSize: 15.0,
-                        color: Colors.grey,
-                        fontFamily: "Alte"
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            new Container(
-              child: new Row(
-                children: <Widget>[
-                  new Container(
-                    child: new Text(
-                      "Sabyeolbe",
-                      style: new TextStyle(
-                        fontSize: 15.0,
-                        color: Colors.grey,
-                        fontFamily: "Alte"
-                      ),
-                    ),
-                  ),
-                  new Container(
-                    padding: EdgeInsets.only(
-                      right: 12.0
-                    ),
-                    child: new Image.network("https://bnetcmsus-a.akamaihd.net/cms/page_media/BP0XDXDMWZ421512776701354.png", width: 50.0)
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
+      children: _lineupsListItems(),
     );
+  }
+
+  _lineupsListItems() {
+    List<Widget> items = [];
+    for (var index = 0; index <= 5; index++) {
+      var playerIdsPair = [currentMatch.seen_players.first[index], currentMatch.seen_players.last[index]];
+      var element = new Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          new Container(
+            child: new Row(
+              children: <Widget>[
+                new Container(
+                  padding: EdgeInsets.only(
+                    left: 12.0
+                  ),
+                  child: new Image.network(_getLineupPlayers(playerIdsPair.first)["headshot"], width: 50.0)
+                ),
+                new Container(
+                  padding: EdgeInsets.only(
+                    right: 10.0,
+                    left: 10.0
+                  ),
+                  child: new Stack(
+                    children: <Widget>[
+                      new Container(
+                        constraints: new BoxConstraints.expand(
+                          height: 25.0,
+                          width: 25.0,
+                        ),
+                        decoration: new BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                      ),
+                      new Center(
+                        child: new Image.network(
+                          _getCurrentPlayerHero(playerIdsPair.first),
+                          width: 25.0,
+                          color: Colors.white,
+                          colorBlendMode: BlendMode.exclusion,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                new Container(
+                  child: new Text(
+                    _getLineupPlayers(playerIdsPair.first)["gamertag"],
+                    style: new TextStyle(
+                      fontSize: 15.0,
+                      color: Colors.grey,
+                      fontFamily: "Alte"
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          new Container(
+            child: new Row(
+              children: <Widget>[
+                new Container(
+                  child: new Text(
+                    _getLineupPlayers(playerIdsPair.last)["gamertag"],
+                    style: new TextStyle(
+                      fontSize: 15.0,
+                      color: Colors.grey,
+                      fontFamily: "Alte"
+                    ),
+                  ),
+                ),
+                new Container(
+                  padding: EdgeInsets.only(
+                    right: 10.0,
+                    left: 10.0
+                  ),
+                  child: new Stack(
+                    children: <Widget>[
+                      new Container(
+                        constraints: new BoxConstraints.expand(
+                          height: 25.0,
+                          width: 25.0,
+                        ),
+                        decoration: new BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                      ),
+                      new Center(
+                        child: new Image.network(
+                          _getCurrentPlayerHero(playerIdsPair.last),
+                          width: 25.0,
+                          color: Colors.white,
+                          colorBlendMode: BlendMode.exclusion,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                new Container(
+                  padding: EdgeInsets.only(
+                    right: 12.0
+                  ),
+                  child: new Image.network(_getLineupPlayers(playerIdsPair.last)["headshot"], width: 50.0)
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+      items.add(element);
+    };
+    return items;
+  }
+
+  _getCurrentPlayerHero(int id) {
+    var hero = currentMatch.players[id.toString()]["hero"];
+    return 'https://d1u1mce87gyfbn.cloudfront.net/hero/' + hero + '/icon-right-menu.png';
+  }
+
+  _getLineupPlayers(int id) {
+    return players[id.toString()];
   }
 }

@@ -38,10 +38,20 @@ flutter:
     - images/owl-splash.png
     - images/owl-splash-small.png
     - images/owl-splash-smaller.png
-    - images/team-4403-logo.png
     - images/team-4402-logo.png
+    - images/team-4403-logo.png
+    - images/team-4404-logo.png
+    - images/team-4405-logo.png
+    - images/team-4406-logo.png
+    - images/team-4407-logo.png
+    - images/team-4408-logo.png
+    - images/team-4409-logo.png
+    - images/team-4410-logo.png
+    - images/team-4523-logo.png
+    - images/team-4524-logo.png
+    - images/team-4525-logo.png
     - images/map_type_assault.png
-    - images/map_type_scort.png
+    - images/map_type_escort.png
     - images/map_type_control.png
     - images/map_type_hybrid.png
   #  - images/a_dot_ham.jpeg

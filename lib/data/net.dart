@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:owl_live_stats/values/strings.dart';
 import 'package:owl_live_stats/models/match.dart';
+import 'package:owl_live_stats/models/teams.dart';
+import 'package:owl_live_stats/models/players.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -51,11 +53,13 @@ class Net {
   }
 
   teams(Map<String, String> params) async {
-    await request('teams_preferences_key', 'get', 'teams_url_path', params, {}, {'Authorization': authToken});
+    final response = await request('teams_preferences_key', 'get', 'teams_url_path', params, {}, {'Authorization': authToken});
+    singleton.teams = Teams.fromJson(json.decode(response.body));
   }
 
   players(Map<String, String> params) async {
-    await request('players_preferences_key', 'get', 'players_url_path', params, {}, {'Authorization': authToken});
+    final response = await request('players_preferences_key', 'get', 'players_url_path', params, {}, {'Authorization': authToken});
+    singleton.players = Players.fromJson(json.decode(response.body));
   }
 
   request(String key, String method, String path, Map<String, String> params,  Map<String, String> body, Map<String, String> headers) async {

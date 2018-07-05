@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const env = "development"; //// Change to 'prduction' before deployment
 
 void main() async {
+  MaterialPageRoute.debugEnableFadingRoutes = true;
   runApp(new MyApp());
 }
 

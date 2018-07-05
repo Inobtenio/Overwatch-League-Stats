@@ -1,7 +1,11 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:owl_live_stats/models/match.dart';
 import 'package:owl_live_stats/models/teams.dart';
 import 'package:owl_live_stats/models/players.dart';
+import 'package:owl_live_stats/models/schedule.dart';
+import 'package:owl_live_stats/views/details/team.dart';
+import 'package:owl_live_stats/views/details/player.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:async_loader/async_loader.dart';
@@ -14,22 +18,36 @@ import 'package:owl_live_stats/globals.dart';// as globals;
 
 class LiveTabWidget extends StatefulWidget
 {
-  State<StatefulWidget> createState() => new LiveTabState();
+  BuildContext globalContext;
+  LiveTabWidget(BuildContext context) {
+    this.globalContext = context;
+  }
+  State<StatefulWidget> createState() => new LiveTabState(this.globalContext);
 }
 
 class LiveTabState extends State<LiveTabWidget> {
+
   var network = new Net(environment);
   var singleton = Singleton();
+  List<Map<String, dynamic>> schedule;
   Match currentMatch;
   Map<String, dynamic> teams;
   Map<String, dynamic> players;
-  BuildContext context;
+  BuildContext globalContext;
+
+  LiveTabState(BuildContext context) {
+    this.globalContext = context;
+  }
 
   getData() {
-//    currentMatch = Match.fromJson(json.decode(Singleton().currentMatch));
+    schedule = singleton.schedule.matches;
     currentMatch = singleton.currentMatch;
     teams = singleton.teams.teams;
     players = singleton.players.players;
+  }
+
+  fetchSchedule() async {
+    await network.schedule();
   }
 
   fetchMatch() async {
@@ -51,6 +69,7 @@ class LiveTabState extends State<LiveTabWidget> {
   }
 
   process() async {
+    await fetchSchedule();
     await fetchMatch();
     await fetchTeams({'foo': 'bar'});
     await fetchPlayers({'id': playersIdsAsString()});
@@ -59,15 +78,15 @@ class LiveTabState extends State<LiveTabWidget> {
 
   void initState() {
     super.initState();
-    const oneSec = const Duration(seconds:5);
+    const oneSec = const Duration(seconds:20);
     new Timer.periodic(oneSec, (Timer t) => setState(() {
+      print('Request!');
       fetchMatch();
     }));
   }
 
   @override
   Widget build(BuildContext context) {
-    this.context = context;
     var _asyncLoader = new AsyncLoader(
       initState: () async => await process(),
       renderLoad: () => _displayLoader(),
@@ -103,7 +122,7 @@ class LiveTabState extends State<LiveTabWidget> {
     if (currentMatch.id != "" && currentMatch.id != null) {
       return new CupertinoPageScaffold(
         navigationBar: new CupertinoNavigationBar(
-          middle: new Text("Current Match"),
+          middle: new Text(_getMatch()['state'] == "PENDING" ? "Current Match" : "Last Match - Finished"),
           backgroundColor: Colors.white
         ),
         child: new ListView(
@@ -189,35 +208,38 @@ class LiveTabState extends State<LiveTabWidget> {
   }
 
   _currentScore() {
-    return new Container(
-      child: new Align(
-        alignment: Alignment(0.0, -1.0),
-        child: new Container(
-          margin: new EdgeInsets.only(
-            top: 5.0,
-          ),
-          padding: new EdgeInsets.only(
-            top: 2.0,
-            left: 11.0,
-            right: 11.0,
-            bottom: 3.0
-          ),
-          decoration: new BoxDecoration(
-            color: Colors.white,
-            border: Border.all(width: 0.6, color: Colors.grey),
-            borderRadius: BorderRadius.all(Radius.circular(6.0)),
-          ),
-          child: new Text(
-            _calculateCurrentScore(),
-            style: new TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20.0,
-              color: Colors.black
+    if (_getMatch()['state'] == "PENDING") {
+      return new Container(
+        child: new Align(
+          alignment: Alignment(0.0, -1.0),
+          child: new Container(
+            margin: new EdgeInsets.only(
+              top: 5.0,
+            ),
+            padding: new EdgeInsets.only(
+              top: 2.0,
+              left: 11.0,
+              right: 11.0,
+              bottom: 3.0
+            ),
+            decoration: new BoxDecoration(
+              color: Colors.white,
+              border: Border.all(width: 0.6, color: Colors.grey),
+              borderRadius: BorderRadius.all(Radius.circular(6.0)),
+            ),
+            child: new Text(
+              _calculateCurrentScore(),
+              style: new TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20.0,
+                color: Colors.black
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    };
+    return new Container();
   }
 
   _calculateCurrentScore() {
@@ -239,19 +261,7 @@ class LiveTabState extends State<LiveTabWidget> {
             child: new Align(
               alignment: Alignment(0.0, -1.0),
               heightFactor: 1.1,
-              child: new Column(
-                children: <Widget>[
-                  new Image.asset(_getTeamsLogos()['first'], height: 150.0, fit: BoxFit.scaleDown ),
-                  new Text(
-                    _getTeamsNames()['first'],
-                    style: new TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      fontFamily: "Alte"
-                    ),
-                  )
-                ]
-              )
+              child: _teamLogoAndName('first'),
             ),
           ),
         ),
@@ -267,24 +277,64 @@ class LiveTabState extends State<LiveTabWidget> {
             child: new Align(
               alignment: Alignment(0.0, -1.0),
               heightFactor: 1.1,
-              child: new Column(
-                children: <Widget>[
-                  new Image.asset(_getTeamsLogos()['last'], height: 150.0, fit: BoxFit.scaleDown ),
-                  new Text(
-                    _getTeamsNames()['last'],
-                    style: new TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      fontFamily: "Alte"
-                    ),
-                  ),
-                ]
-              ),
+              child: _teamLogoAndName('last'),
             ),
           ),
         ),
       ],
     );
+  }
+
+  _teamLogoAndName(String place) {
+    return new GestureDetector(
+      onTap: () {
+        Navigator.of(globalContext).push(
+          new CupertinoPageRoute<void>(
+            builder: (BuildContext context) {
+              return new CupertinoPageScaffold(
+                navigationBar: new CupertinoNavigationBar(
+                  middle: new Text(
+                    'Team',
+                    style: new TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontSize: 22.0,
+                      color: Colors.white,
+                      fontFamily: "Alte"
+                    ),
+                  ),
+                  backgroundColor: colorFromHex(_getTeams()[place]['color']),
+                  actionsForegroundColor: orangeColor,
+                ),
+                child: new Material(
+                  type: MaterialType.transparency,
+                  child: new TeamDetailWidget(_getTeams()[place], globalContext),
+                ),
+              );
+            },
+          ),
+        );
+      },
+      child: new Column(
+        children: <Widget>[
+          new Image.asset(_getTeamsLogos()[place], height: 150.0, fit: BoxFit.scaleDown ),
+          new Text(
+            _getTeamsNames()[place],
+            style: new TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontFamily: "Alte"
+            ),
+          )
+        ],
+      )
+    );
+  }
+
+  _getTeams() {
+    return {
+      'first': teams[currentMatch.teams.first.toString()],
+      'last': teams[currentMatch.teams.last.toString()],
+    };
   }
 
   _getTeamsNames() {
@@ -336,7 +386,7 @@ class LiveTabState extends State<LiveTabWidget> {
         children: <Widget>[
           new Container(
             decoration: new BoxDecoration(
-              color: Colors.white,
+              color: Color.fromARGB(255, 240, 150, 60),//Colors.white,
               border: Border(
                 bottom: new BorderSide(width: 0.6, color: Colors.grey)
               ),
@@ -346,7 +396,7 @@ class LiveTabState extends State<LiveTabWidget> {
             ),
             child: new Center(
               child: new Text(
-                "Game " + index.toString(),
+                _getGameTitle(index),
                 style: new TextStyle(
                   fontSize: 20.0,
                   color: Colors.black,
@@ -356,62 +406,131 @@ class LiveTabState extends State<LiveTabWidget> {
             ),
           ),
           new Container(
+            constraints: new BoxConstraints.expand(
+              height: 110.0,
+            ),
             decoration: new BoxDecoration(
-              border: Border(
-                bottom: new BorderSide(width: 1.6, color: Colors.grey)
+              image: new DecorationImage(
+                colorFilter: ColorFilter.mode(Color.fromARGB(255, 200, 200, 200), BlendMode.overlay),
+                image: new ExactAssetImage('images/maps/' + _getGameMap(index)['map']  + '.jpg'),
+                fit: BoxFit.cover,
               ),
+//              border: Border(
+//                bottom: new BorderSide(width: 1.6, color: Colors.grey)
+//              ),
             ),
             child: new Row(
               children: <Widget>[
                 new Expanded(
                   child: new Center(
-                    child: new Text(
-                      map.first.toString(),
-                      style: new TextStyle(
-                        fontSize: 50.0,
-                        color: Colors.black,
-                        fontFamily: "Alte"
-                      ),
-                    ),
+                    child: _stackedTextWithBackground(map.first.toString(), 60.0),
                   ),
                 ),
                 new Expanded(
-                  child: new Center(
-                    child: new Image.asset("images/map_type_" + currentMatch.map_types[index-1] + ".png", width: 40.0)
-                  ),
+//                  child: new Column(
+//                    children: <Widget>[
+                      child: new Container(
+                        alignment: Alignment(0.0, 0.0),
+                        child: new Image.asset("images/map_type_" + currentMatch.map_types[index-1] + ".png", width: 70.0)
+                      ),
+//                      new Container(
+//                        padding: EdgeInsets.only(
+//                          top: 2.0,
+//                        ),
+//                        child: new Text(
+//                          _getGameMapName(index),
+//                          style: new TextStyle(
+//                            fontSize: 23.0,
+//                            color: Colors.black,
+//                            fontFamily: "Alte"
+//                          ),
+//                        ),
+//                      ),
+//                    ],
+//                  ),
                 ),
                 new Expanded(
                   child: new Center(
-                    child: new Text(
-                      map.last.toString(),
-                      style: new TextStyle(
-                        fontSize: 60.0,
-                        color: Colors.black,
-                        fontFamily: "Alte"
-                      ),
-                    )
+                    child: _stackedTextWithBackground(map.last.toString(), 60.0),
                   ),
                 ),
               ],
             ),
           ),
-          new Container(
-            decoration: new BoxDecoration(
-              color: Colors.grey,
-              border: Border(
-                bottom: new BorderSide(width: 0.6, color: Colors.grey)
-              ),
-            ),
-            constraints: new BoxConstraints.expand(
-              height: 15.0,
-            ),
-          ),
+          _gameListItemSeparator(index),
         ],
       );
       items.add(element);
       index += 1;
     });
     return items;
+  }
+
+  _getGameMapName(int index) {
+    return MAPS[_getGameMap(index)['map']];
+  }
+
+  _getGameMap(int index) {
+    var match = _getMatch(); 
+    return match['games'][index-1];
+  }
+
+  _getMatch() {
+    return schedule.singleWhere((match) {
+      return match['id'] == currentMatch.match_id;
+    });
+  }
+
+  _stackedTextWithBackground(String text, double size) {
+    return new Stack(
+      children: <Widget>[
+        new Text(
+          text,
+          style: new TextStyle(
+            fontSize: size,
+            fontWeight: FontWeight.w900,
+            color: Colors.black,
+            fontFamily: "Alte"
+          ),
+        ),
+        new Text(
+          text,
+          style: new TextStyle(
+            fontSize: size,
+            fontWeight: FontWeight.w100,
+            color: Colors.white,
+            fontFamily: "Alte"
+          ),
+        ),
+      ],
+    );
+  }
+
+  _getGameTitle(int index) {
+    if (_getMatch()['state'] == "PENDING") {
+      if (index != currentMatch.maps.length) {
+        return "Game " + index.toString();
+      };
+      return "Current Game";
+    };
+    return "Game " + index.toString();
+  }
+
+  _gameListItemSeparator(int index) {
+    if (index != currentMatch.maps.length) {
+      return new Container(
+        decoration: new BoxDecoration(
+          color: Colors.black,//Color.fromARGB(200, 90, 90, 90),//Colors.white,
+//          border: Border(
+//            bottom: new BorderSide(width: 0.6, color: Colors.grey)
+//          ),
+        ),
+        constraints: new BoxConstraints.expand(
+          height: 3.0,
+        ),
+      );
+    };
+    return new Container();
   }
 
   _lineupsBar() {
@@ -422,7 +541,7 @@ class LiveTabState extends State<LiveTabWidget> {
       color: Colors.black,
       child: new Center(
         child: new Text(
-          "Lineups",
+          _getMatch()['state'] == "PENDING" ? "Current Lineups" : "Last-seen Lineups",
           style: new TextStyle(
             fontSize: 20.0,
             color: Colors.white,
@@ -434,8 +553,15 @@ class LiveTabState extends State<LiveTabWidget> {
   }
 
   _lineupsList() {
-    return new Column(
-      children: _lineupsListItems(),
+    return new Container(
+      padding: EdgeInsets.only(
+        left: 10.0,
+        right: 10.0,
+        bottom: 7.0
+      ),
+      child: new Column(
+        children: _lineupsListItems(),
+      ),
     );
   }
 
@@ -443,114 +569,215 @@ class LiveTabState extends State<LiveTabWidget> {
     List<Widget> items = [];
     for (var index = 0; index <= 5; index++) {
       var playerIdsPair = [currentMatch.seen_players.first[index], currentMatch.seen_players.last[index]];
-      var element = new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      var element = new Column(
         children: <Widget>[
-          new Container(
-            child: new Row(
-              children: <Widget>[
-                new Container(
-                  padding: EdgeInsets.only(
-                    left: 12.0
-                  ),
-                  child: new Image.network(_getLineupPlayers(playerIdsPair.first)["headshot"], width: 50.0)
-                ),
-                new Container(
-                  padding: EdgeInsets.only(
-                    right: 10.0,
-                    left: 10.0
-                  ),
-                  child: new Stack(
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              new GestureDetector(
+                onTap: () {
+                  Navigator.of(this.globalContext).push(
+                    new CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return new CupertinoPageScaffold(
+                          navigationBar: new CupertinoNavigationBar(
+                            middle: new Text(
+                              'Player',
+                              style: new TextStyle(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 22.0,
+                                color: Colors.white,
+                                fontFamily: "Alte"
+                              ),
+                            ),
+                            backgroundColor: colorFromHex(_getTeams()['first']['color']),
+                            actionsForegroundColor: orangeColor,
+                          ),
+                          child: new Material(
+                            type: MaterialType.transparency,
+                            child: new PlayerDetailWidget(_getLineupPlayers(playerIdsPair.first), this.globalContext),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+                child:new Container(
+                  child: new Row(
                     children: <Widget>[
                       new Container(
-                        constraints: new BoxConstraints.expand(
-                          height: 25.0,
-                          width: 25.0,
+                        padding: EdgeInsets.only(
+                          left: 5.0
                         ),
-                        decoration: new BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
+                        child: new CachedNetworkImage(
+                          imageUrl: _getLineupPlayers(playerIdsPair.first)["headshot"],
+                          placeholder: new Icon(Icons.person, size: 50.0),
+                          errorWidget: new Icon(Icons.person, size: 50.0),
+                          width: 50.0
+                        )
+                      ),
+                      new Container(
+                        padding: EdgeInsets.only(
+                          top: 8.0,
+                          right: 10.0,
+                          left: 10.0
+                        ),
+                        child: new Stack(
+                          children: <Widget>[
+                            new Container(
+                              constraints: new BoxConstraints.expand(
+                                height: 25.0,
+                                width: 25.0,
+                              ),
+                              decoration: new BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                              ),
+                            ),
+                            new Center(
+                              child: new Image.network(
+                                _getCurrentPlayerHero(playerIdsPair.first),
+                                width: 25.0,
+                                color: Colors.white,
+                                colorBlendMode: BlendMode.exclusion,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      new Center(
-                        child: new Image.network(
-                          _getCurrentPlayerHero(playerIdsPair.first),
-                          width: 25.0,
-                          color: Colors.white,
-                          colorBlendMode: BlendMode.exclusion,
+                      new Container(
+                        padding: EdgeInsets.only(
+                          top: 8.0
+                        ),
+                        child: new Text(
+                          _getLineupPlayers(playerIdsPair.first)["gamertag"],
+                          style: new TextStyle(
+                            fontSize: 15.0,
+                            color: Colors.grey,
+                            fontFamily: "Alte"
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                new Container(
-                  child: new Text(
-                    _getLineupPlayers(playerIdsPair.first)["gamertag"],
-                    style: new TextStyle(
-                      fontSize: 15.0,
-                      color: Colors.grey,
-                      fontFamily: "Alte"
+              ),
+              new GestureDetector(
+                onTap: () {
+                  Navigator.of(this.globalContext).push(
+                    new CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return new CupertinoPageScaffold(
+                          navigationBar: new CupertinoNavigationBar(
+                            middle: new Text(
+                              'Player',
+                              style: new TextStyle(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 22.0,
+                                color: Colors.white,
+                                fontFamily: "Alte"
+                              ),
+                            ),
+                            backgroundColor: colorFromHex(_getTeams()['last']['color']),
+                            actionsForegroundColor: orangeColor,
+                          ),
+                          child: new Material(
+                            type: MaterialType.transparency,
+                            child: new PlayerDetailWidget(_getLineupPlayers(playerIdsPair.last), this.globalContext),
+                          ),
+                        );
+                      },
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          new Container(
-            child: new Row(
-              children: <Widget>[
-                new Container(
-                  child: new Text(
-                    _getLineupPlayers(playerIdsPair.last)["gamertag"],
-                    style: new TextStyle(
-                      fontSize: 15.0,
-                      color: Colors.grey,
-                      fontFamily: "Alte"
-                    ),
-                  ),
-                ),
-                new Container(
-                  padding: EdgeInsets.only(
-                    right: 10.0,
-                    left: 10.0
-                  ),
-                  child: new Stack(
+                  );
+                },
+                child: new Container(
+                  child: new Row(
                     children: <Widget>[
                       new Container(
-                        constraints: new BoxConstraints.expand(
-                          height: 25.0,
-                          width: 25.0,
+                        padding: EdgeInsets.only(
+                          top: 8.0
                         ),
-                        decoration: new BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
+                        child: new Text(
+                          _getLineupPlayers(playerIdsPair.last)["gamertag"],
+                          style: new TextStyle(
+                            fontSize: 15.0,
+                            color: Colors.grey,
+                            fontFamily: "Alte"
+                          ),
                         ),
                       ),
-                      new Center(
-                        child: new Image.network(
-                          _getCurrentPlayerHero(playerIdsPair.last),
-                          width: 25.0,
-                          color: Colors.white,
-                          colorBlendMode: BlendMode.exclusion,
+                      new Container(
+                        padding: EdgeInsets.only(
+                          top: 8.0,
+                          right: 10.0,
+                          left: 10.0
                         ),
+                        child: new Stack(
+                          children: <Widget>[
+                            new Container(
+                              constraints: new BoxConstraints.expand(
+                                height: 25.0,
+                                width: 25.0,
+                              ),
+                              decoration: new BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                              ),
+                            ),
+                            new Center(
+                              child: new Image.network(
+                                _getCurrentPlayerHero(playerIdsPair.last),
+                                width: 25.0,
+                                color: Colors.white,
+                                colorBlendMode: BlendMode.exclusion,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      new Container(
+                        padding: EdgeInsets.only(
+                          right: 5.0
+                        ),
+                        child: new CachedNetworkImage(
+                          imageUrl: _getLineupPlayers(playerIdsPair.last)["headshot"],
+                          placeholder: new Icon(Icons.person, size: 50.0),
+                          errorWidget: new Icon(Icons.person, size: 50.0),
+                          width: 50.0
+                        )
                       ),
                     ],
                   ),
                 ),
-                new Container(
-                  padding: EdgeInsets.only(
-                    right: 12.0
-                  ),
-                  child: new Image.network(_getLineupPlayers(playerIdsPair.last)["headshot"], width: 50.0)
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
+          _lineupsListItemSeparator(index),
         ],
       );
       items.add(element);
     };
     return items;
+  }
+
+  _lineupsListItemSeparator(int index) {
+    if (index != 5) {
+      return new Container(
+        margin: EdgeInsets.only(
+          top: 7.0,
+        ),
+        decoration: new BoxDecoration(
+          color: Color.fromARGB(200, 90, 90, 90),//Colors.white,
+          border: Border(
+            bottom: new BorderSide(width: 0.6, color: Colors.grey)
+          ),
+        ),
+        constraints: new BoxConstraints.expand(
+          height: 0.1,
+        ),
+      );
+    };
+    return new Container();
   }
 
   _getCurrentPlayerHero(int id) {

@@ -51,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var globalContext = context;
     return new CupertinoTabScaffold(
       tabBar: new CupertinoTabBar(
         activeColor: Color.fromARGB(255, 240, 150, 60),
@@ -67,17 +68,17 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: new Icon(Icons.today),
               title: new Text("Schedule")
           ),
-          new BottomNavigationBarItem(
-              icon: new Icon(Icons.settings),
-              title: new Text("Settings")
-          ),
+//          new BottomNavigationBarItem(
+//              icon: new Icon(Icons.settings),
+//              title: new Text("Settings")
+//          ),
         ],
         backgroundColor: Colors.white
       ),
       tabBuilder: (BuildContext context, int index) {
         return new Material(
           type: MaterialType.transparency,
-          child: TABS[index],
+          child: Tabs(globalContext).at(index),
         );
       },
     );

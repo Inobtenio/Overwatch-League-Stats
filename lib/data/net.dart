@@ -3,6 +3,7 @@ import 'package:owl_live_stats/values/strings.dart';
 import 'package:owl_live_stats/models/match.dart';
 import 'package:owl_live_stats/models/teams.dart';
 import 'package:owl_live_stats/models/players.dart';
+import 'package:owl_live_stats/models/schedule.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -45,6 +46,11 @@ class Net {
       return new Uri.http(SETTINGS[env]['host'], SETTINGS[env][path], params).toString();
     }
     return new Uri.https(SETTINGS[env]['host'], SETTINGS[env][path], params).toString();
+  }
+
+  schedule() async {
+    final response = await request('schedule_preferences_key', 'get', 'schedule_url_path', {}, {}, {'Authorization': authToken});
+    singleton.schedule = Schedule.fromJson(json.decode(response.body));
   }
 
   match() async {

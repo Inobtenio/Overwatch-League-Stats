@@ -13,6 +13,8 @@ dependencies:
   json_annotation: ^0.2.3
   shared_preferences: ^0.4.2
   async_loader: 0.1.1
+  cached_network_image: ^0.4.1
+  intl: ^0.15.6
 
 
 dev_dependencies:
@@ -35,6 +37,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+  ## Team logos
     - images/owl-splash.png
     - images/owl-splash-small.png
     - images/owl-splash-smaller.png
@@ -50,10 +53,50 @@ flutter:
     - images/team-4523-logo.png
     - images/team-4524-logo.png
     - images/team-4525-logo.png
+  ## Small team logos
+    - images/team-4402-logo-small.png
+    - images/team-4403-logo-small.png
+    - images/team-4404-logo-small.png
+    - images/team-4405-logo-small.png
+    - images/team-4406-logo-small.png
+    - images/team-4407-logo-small.png
+    - images/team-4408-logo-small.png
+    - images/team-4409-logo-small.png
+    - images/team-4410-logo-small.png
+    - images/team-4523-logo-small.png
+    - images/team-4524-logo-small.png
+    - images/team-4525-logo-small.png
+  ## Map types
     - images/map_type_assault.png
     - images/map_type_escort.png
     - images/map_type_control.png
     - images/map_type_hybrid.png
+  ## Maps
+    - images/maps/blizzard-world.jpg
+    - images/maps/dorado.jpg
+    - images/maps/eichenwalde.jpg
+    - images/maps/gibraltar.jpg
+    - images/maps/hanamura.jpg
+    - images/maps/hollywood.jpg
+    - images/maps/horizon-lunar-colony.jpg
+    - images/maps/ilios.jpg
+    - images/maps/junkertown.jpg
+    - images/maps/kings-row.jpg
+    - images/maps/lijiang.jpg
+    - images/maps/nepal.jpg
+    - images/maps/numbani.jpg
+    - images/maps/oasis.jpg
+    - images/maps/rialto.jpg
+    - images/maps/route-66.jpg
+    - images/maps/temple-of-anubis.jpg
+    - images/maps/volskaya-industries.jpg
+    - images/roles/support.png
+    - images/roles/tank.png
+    - images/roles/offense.png
+    - images/roles/flex.png
+  ## Icons
+    - images/battle-icon.png
+
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

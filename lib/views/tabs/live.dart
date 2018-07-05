@@ -80,7 +80,6 @@ class LiveTabState extends State<LiveTabWidget> {
     super.initState();
     const oneSec = const Duration(seconds:20);
     new Timer.periodic(oneSec, (Timer t) => setState(() {
-      print('Request!');
       fetchMatch();
     }));
   }

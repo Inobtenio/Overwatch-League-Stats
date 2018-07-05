@@ -111,60 +111,118 @@ class MatchesListState extends State<MatchesListWidget> {
               new Row(
                 children: <Widget>[
                   new Expanded(
-                    child: Container(
-                      height: 200.0,
-                      color: colorFromHex(contendants.first['color']),
-                      child: new Column(
-                        children: <Widget>[
-                          new Container(
-                            height: 150.0,
-                            width: 150.0,
-                            padding: EdgeInsets.only(
-                              left: 20.0,
-                              right: 20.0,
-                            ),
-                            child: Image.asset('images/team-' + contendants.first['id'].toString() + '-logo-small.png', width: 120.0),
+                    child: new GestureDetector(
+                      onTap: () {
+                        Navigator.of(this.globalContext).push(
+                          new CupertinoPageRoute<void>(
+                            builder: (BuildContext context) {
+                              return new CupertinoPageScaffold(
+                                navigationBar: new CupertinoNavigationBar(
+                                  middle: new Text(
+                                    'Team',
+                                    style: new TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 22.0,
+                                      color: Colors.white,
+                                      fontFamily: "Alte"
+                                    ),
+                                  ),
+                                  backgroundColor: colorFromHex(contendants.first['color']),
+                                  actionsForegroundColor: orangeColor,
+                                ),
+                                child: new Material(
+                                  type: MaterialType.transparency,
+                                  child: new TeamDetailWidget(contendants.first, this.globalContext)
+                                ),
+                              );
+                            },
                           ),
-                          new Expanded(
-                            child: new Text(
-                              match['teams'].first['wins'].toString() + ' - ' + match['teams'].first['losses'].toString(),
-                              style: new TextStyle(
-                                fontSize: 28.0,
-                                color: Colors.white,
-                                fontFamily: "Alte"
+                        );
+                      },
+                      child: Container(
+                        height: 200.0,
+                        color: colorFromHex(contendants.first['color']),
+                        child: new Column(
+                          children: <Widget>[
+                            new Container(
+                              height: 150.0,
+                              width: 150.0,
+                              padding: EdgeInsets.only(
+                                left: 20.0,
+                                right: 20.0,
+                              ),
+                              child: Image.asset('images/team-' + contendants.first['id'].toString() + '-logo-small.png', width: 120.0),
+                            ),
+                            new Expanded(
+                              child: new Text(
+                                match['teams'].first['wins'].toString() + ' - ' + match['teams'].first['losses'].toString(),
+                                style: new TextStyle(
+                                  fontSize: 28.0,
+                                  color: Colors.white,
+                                  fontFamily: "Alte"
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                   new Expanded(
-                    child: Container(
-                      height: 200.0,
-                      color: colorFromHex(contendants.last['color']),
-                      child: new Column(
-                        children: <Widget>[
-                          new Container(
-                            height: 150.0,
-                            width: 150.0,
-                            padding: EdgeInsets.only(
-                              left: 20.0,
-                              right: 20.0,
-                            ),
-                            child: Image.asset('images/team-' + contendants.last['id'].toString() + '-logo-small.png', width: 120.0),
+                    child: new GestureDetector(
+                      onTap: () {
+                        Navigator.of(this.globalContext).push(
+                          new CupertinoPageRoute<void>(
+                            builder: (BuildContext context) {
+                              return new CupertinoPageScaffold(
+                                navigationBar: new CupertinoNavigationBar(
+                                  middle: new Text(
+                                    'Team',
+                                    style: new TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 22.0,
+                                      color: Colors.white,
+                                      fontFamily: "Alte"
+                                    ),
+                                  ),
+                                  backgroundColor: colorFromHex(contendants.last['color']),
+                                  actionsForegroundColor: orangeColor,
+                                ),
+                                child: new Material(
+                                  type: MaterialType.transparency,
+                                  child: new TeamDetailWidget(contendants.last, this.globalContext)
+                                ),
+                              );
+                            },
                           ),
-                          new Expanded(
-                            child: new Text(
-                              match['teams'].last['wins'].toString() + ' - ' + match['teams'].last['losses'].toString(),
-                              style: new TextStyle(
-                                fontSize: 28.0,
-                                color: Colors.white,
-                                fontFamily: "Alte"
+                        );
+                      },
+                      child: Container(
+                        height: 200.0,
+                        color: colorFromHex(contendants.last['color']),
+                        child: new Column(
+                          children: <Widget>[
+                            new Container(
+                              height: 150.0,
+                              width: 150.0,
+                              padding: EdgeInsets.only(
+                                left: 20.0,
+                                right: 20.0,
+                              ),
+                              child: Image.asset('images/team-' + contendants.last['id'].toString() + '-logo-small.png', width: 120.0),
+                            ),
+                            new Expanded(
+                              child: new Text(
+                                match['teams'].last['wins'].toString() + ' - ' + match['teams'].last['losses'].toString(),
+                                style: new TextStyle(
+                                  fontSize: 28.0,
+                                  color: Colors.white,
+                                  fontFamily: "Alte"
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -242,28 +300,5 @@ class MatchesListState extends State<MatchesListWidget> {
     }
     return "Schedule";
   }
-//                children: <Widget>[
-//                  new Container(
-//                    padding: EdgeInsets.only(
-//                      left: 20.0,
-//                      right: 20.0,
-//                    ),
-//                    child: Image.asset('images/team-' + team['id'].toString() + '-logo-small.png', width: 50.0),
-//                  ),
-//                  new Expanded(
-//                    child: new Text(
-//                      team["name"],
-//                      style: new TextStyle(
-//                        fontSize: 28.0,
-//                        color: Colors.white,
-//                        fontFamily: "Alte"
-//                      ),
-//                    ),
-//                  ),
-//                ],
-//              ),
-//            ),
-//          ),
-//        ],
-//      );
+
 }

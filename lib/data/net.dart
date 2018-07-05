@@ -49,23 +49,39 @@ class Net {
   }
 
   schedule() async {
-    final response = await request('schedule_preferences_key', 'get', 'schedule_url_path', {}, {}, {'Authorization': authToken});
-    singleton.schedule = Schedule.fromJson(json.decode(response.body));
+    try {
+      final response = await request('schedule_preferences_key', 'get', 'schedule_url_path', {}, {}, {'Authorization': authToken});
+      singleton.schedule = Schedule.fromJson(json.decode(response.body));
+    } catch (e) {
+      return singleton.schedule = Schedule.fromJson({'matches': []});
+    }
   }
 
   match() async {
-    final response = await request('match_preferences_key', 'get', 'match_url_path', {}, {}, {'Authorization': authToken});
-    singleton.currentMatch = Match.fromJson(json.decode(response.body));
+    try {
+      final response = await request('match_preferences_key', 'get', 'match_url_path', {}, {}, {'Authorization': authToken});
+      singleton.currentMatch = Match.fromJson(json.decode(response.body));
+    } catch (e) {
+      return singleton.currentMatch = Match.fromJson({'id': null});
+    }
   }
 
   teams(Map<String, String> params) async {
-    final response = await request('teams_preferences_key', 'get', 'teams_url_path', params, {}, {'Authorization': authToken});
-    singleton.teams = Teams.fromJson(json.decode(response.body));
+    try {
+      final response = await request('teams_preferences_key', 'get', 'teams_url_path', params, {}, {'Authorization': authToken});
+      singleton.teams = Teams.fromJson(json.decode(response.body));
+    } catch (e) {
+      return singleton.teams = Teams.fromJson({'teams': {}});
+    }
   }
 
   players(Map<String, String> params) async {
-    final response = await request('players_preferences_key', 'get', 'players_url_path', params, {}, {'Authorization': authToken});
-    singleton.players = Players.fromJson(json.decode(response.body));
+    try {
+      final response = await request('players_preferences_key', 'get', 'players_url_path', params, {}, {'Authorization': authToken});
+      singleton.players = Players.fromJson(json.decode(response.body));
+    } catch (e) {
+      return singleton.players = Players.fromJson({'players': {}});
+    }
   }
 
   request(String key, String method, String path, Map<String, String> params,  Map<String, String> body, Map<String, String> headers) async {

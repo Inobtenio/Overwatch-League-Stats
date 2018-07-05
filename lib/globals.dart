@@ -10,7 +10,7 @@ import 'package:owl_live_stats/models/schedule.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 var orangeColor = Color.fromARGB(210, 240, 150, 60);
-var environment = 'development';
+var environment = 'stage';
 const MAPS = {
   'blizzard-world': 'Blizzard World',
   'dorado': 'Dorado',

@@ -1,65 +1,40 @@
-import 'dart:async';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:owl_live_stats/models/match.dart';
-import 'package:owl_live_stats/models/teams.dart';
-import 'package:owl_live_stats/models/players.dart';
-import 'package:owl_live_stats/models/schedule.dart';
 import 'package:owl_live_stats/views/details/team.dart';
-import 'package:owl_live_stats/views/details/player.dart';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:async_loader/async_loader.dart';
-import 'package:http/http.dart' as http;
 import 'package:owl_live_stats/data/net.dart';
-import 'package:owl_live_stats/values/strings.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:owl_live_stats/globals.dart';// as globals;
 
 class TeamsTabWidget extends StatefulWidget
 {
-  BuildContext globalContext;
-  TeamsTabWidget(BuildContext context) {
-    this.globalContext = context;
-  }
-  State<StatefulWidget> createState() => new TeamsTabState(this.globalContext);
+  TeamsTabWidget();
+  State<StatefulWidget> createState() => new TeamsTabState();
 }
 
 class TeamsTabState extends State<TeamsTabWidget> {
 
-  BuildContext globalContext;
-
-  TeamsTabState(BuildContext context) {
-    this.globalContext = context;
-  }
+  TeamsTabState();
 
   @override
   Widget build(BuildContext context) {
     return new Container(
-      child: new TeamsListWidget(this.globalContext),
+      child: new TeamsListWidget(),
     );
   }
 }
 
 class TeamsListWidget extends StatefulWidget
 {
-  BuildContext globalContext;
-  TeamsListWidget(BuildContext context) {
-    this.globalContext = context;
-  }
-  State<StatefulWidget> createState() => new TeamsListState(this.globalContext);
+  TeamsListWidget();
+  State<StatefulWidget> createState() => new TeamsListState();
 }
 
 class TeamsListState extends State<TeamsListWidget> {
 
   var network = new Net(environment);
-  var singleton = Singleton();
-  Map<String, dynamic> teams = this.singleton.teams.teams;
-  BuildContext globalContext;
+  static final singleton = Singleton();
+  Map<String, dynamic> teams = singleton.teams.teams;
 
-  TeamsListState(BuildContext context) {
-    this.globalContext = context;
-  }
+  TeamsListState();
 
   void initState() {
     super.initState();
@@ -103,7 +78,7 @@ class TeamsListState extends State<TeamsListWidget> {
         children: <Widget>[
           new GestureDetector(
             onTap: () {
-              Navigator.of(this.globalContext).push(
+              Navigator.of(globalContext).push(
                 new CupertinoPageRoute<void>(
                   builder: (BuildContext context) {
                     return new CupertinoPageScaffold(
@@ -122,7 +97,7 @@ class TeamsListState extends State<TeamsListWidget> {
                       ),
                       child: new Material(
                         type: MaterialType.transparency,
-                        child: new TeamDetailWidget(team, this.globalContext)
+                        child: new TeamDetailWidget(team, globalContext)
                       ),
                     );
                   },

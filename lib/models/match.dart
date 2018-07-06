@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'match.g.dart';
 
 @JsonSerializable()
-class Match extends Object with _$MatchSerializerMixin {
+class CurrentMatch extends Object with _$CurrentMatchSerializerMixin {
   final String id;
   final map_states;
   final map_types;
@@ -13,7 +13,7 @@ class Match extends Object with _$MatchSerializerMixin {
   final seen_players;
   final teams;
 
-  Match({this.id, this.map_states, this.map_types, this.maps, this.match_id, this.match_state, this.players, this.seen_players, this.teams});
+  CurrentMatch({this.id, this.map_states, this.map_types, this.maps, this.match_id, this.match_state, this.players, this.seen_players, this.teams});
 
-  factory Match.fromJson(Map<String, dynamic> json) => _$MatchFromJson(json);
+  factory CurrentMatch.fromJson(Map<String, dynamic> json) => _$CurrentMatchFromJson(json);
 }

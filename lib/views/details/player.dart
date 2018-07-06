@@ -1,41 +1,27 @@
-import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:owl_live_stats/models/match.dart';
-import 'package:owl_live_stats/models/teams.dart';
-import 'package:owl_live_stats/models/players.dart';
-import 'package:owl_live_stats/models/schedule.dart';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:async_loader/async_loader.dart';
-import 'package:owl_live_stats/data/net.dart';
-import 'package:owl_live_stats/values/strings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:owl_live_stats/globals.dart';// as globals;
 
 class PlayerDetailWidget extends StatefulWidget
 {
-  Map<String, dynamic> player;
-  BuildContext globalContext;
+  final Map<String, dynamic> player;
+  final BuildContext globalContext;
 
-  PlayerDetailWidget(Map<String, dynamic> player, BuildContext context) {
-    this.player = player;
-    this.globalContext = context;
-  }
+  PlayerDetailWidget(this.player, this.globalContext);
   State<StatefulWidget> createState() => new PlayerDetailState(this.player, this.globalContext);
 }
 
 class PlayerDetailState extends State<PlayerDetailWidget> {
-  Map<String, dynamic> player;
-  BuildContext globalContext;
-  var singleton = Singleton();
-  Match currentMatch = this.singleton.currentMatch;
-  List<Map<String, dynamic>> schedule = this.singleton.schedule.matches;
-  Map<String, dynamic> teams = this.singleton.teams.teams;
+  final Map<String, dynamic> player;
+  final BuildContext globalContext;
+  static final singleton = Singleton();
+  CurrentMatch currentMatch = singleton.currentMatch;
+  List<Map<String, dynamic>> schedule = singleton.schedule.matches;
+  Map<String, dynamic> teams = singleton.teams.teams;
 
-  PlayerDetailState(Map<String, dynamic> player, BuildContext context) {
-    this.player = player;
-    this.globalContext = context;
-  }
+  PlayerDetailState(this.player, this.globalContext);
 
   void initState() {
     super.initState();

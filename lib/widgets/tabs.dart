@@ -5,11 +5,7 @@ import 'package:owl_live_stats/views/tabs/teams.dart';
 import 'package:owl_live_stats/views/tabs/schedule.dart';
 
 class Tabs {
-  BuildContext globalContext;
-
-  Tabs(BuildContext context) {
-    this.globalContext = context;
-  }
+  Tabs();
 
   at(int index) {
     return TABS[index];
@@ -18,17 +14,17 @@ class Tabs {
   var TABS = {
     0: new CupertinoTabView(
             builder: (BuildContext context) {
-              return new LiveTabWidget(this.globalContext);
+              return new LiveTabWidget();
             },
           ),
     1: new CupertinoTabView(
             builder: (BuildContext context) {
-              return new TeamsTabWidget(this.globalContext);
+              return new TeamsTabWidget();
             },
           ),
     2: new CupertinoTabView(
             builder: (BuildContext context) {
-              return new ScheduleTabWidget(this.globalContext);
+              return new ScheduleTabWidget();
             },
           ),
 //    3: new CupertinoTabView(

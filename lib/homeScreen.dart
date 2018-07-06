@@ -1,12 +1,7 @@
-import 'dart:async';
-import 'dart:convert';
 import 'package:owl_live_stats/globals.dart';// as globals;
-import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
-import 'package:owl_live_stats/models/match.dart';
 import 'package:owl_live_stats/values/strings.dart';
 import 'package:owl_live_stats/widgets/tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -51,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var globalContext = context;
+    globalContext = context;
     return new CupertinoTabScaffold(
       tabBar: new CupertinoTabBar(
         activeColor: Color.fromARGB(255, 240, 150, 60),
@@ -78,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
       tabBuilder: (BuildContext context, int index) {
         return new Material(
           type: MaterialType.transparency,
-          child: Tabs(globalContext).at(index),
+          child: Tabs().at(index),
         );
       },
     );

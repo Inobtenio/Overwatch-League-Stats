@@ -1,27 +1,17 @@
-import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:owl_live_stats/models/match.dart';
-import 'package:owl_live_stats/models/teams.dart';
-import 'package:owl_live_stats/models/players.dart';
-import 'package:owl_live_stats/models/schedule.dart';
 import 'package:owl_live_stats/views/details/player.dart';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:async_loader/async_loader.dart';
 import 'package:owl_live_stats/data/net.dart';
-import 'package:owl_live_stats/values/strings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:owl_live_stats/globals.dart';// as globals;
 
 class TeamDetailWidget extends StatefulWidget
 {
-  Map<String, dynamic> team;
-  BuildContext globalContext;
+  final Map<String, dynamic> team;
+  final BuildContext globalContext;
 
-  TeamDetailWidget(Map<String, dynamic> team, BuildContext context) {
-    this.team = team;
-    this.globalContext = context;
-  }
+  TeamDetailWidget(this.team, this.globalContext);
   State<StatefulWidget> createState() => new TeamDetailState(this.team, this.globalContext);
 }
 
@@ -82,27 +72,21 @@ class TeamDetailState extends State<TeamDetailWidget> {
 
 class TeamPlayersWidget extends StatefulWidget
 {
-  Map<String, dynamic> team;
-  BuildContext globalContext;
+  final Map<String, dynamic> team;
+  final BuildContext globalContext;
 
-  TeamPlayersWidget(Map<String, dynamic> team, BuildContext context) {
-    this.team = team;
-    this.globalContext = context;
-  }
+  TeamPlayersWidget(this.team, this.globalContext);
   State<StatefulWidget> createState() => new TeamPlayersState(this.team, this.globalContext);
 }
 
 class TeamPlayersState extends State<TeamPlayersWidget> {
-  BuildContext globalContext;
+  final BuildContext globalContext;
   var network = new Net('production');
   var singleton = Singleton();
-  Map<String, dynamic> team;
+  final Map<String, dynamic> team;
   Map<String, dynamic> players;
 
-  TeamPlayersState(Map<String, dynamic> team, BuildContext context) {
-    this.team = team;
-    this.globalContext = context;
-  }
+  TeamPlayersState(this.team, this.globalContext);
 
   fetchPlayers(Map<String, String> params) async {
     await network.players(params);

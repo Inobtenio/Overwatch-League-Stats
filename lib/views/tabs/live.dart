@@ -1,28 +1,18 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:owl_live_stats/models/match.dart';
-import 'package:owl_live_stats/models/teams.dart';
-import 'package:owl_live_stats/models/players.dart';
-import 'package:owl_live_stats/models/schedule.dart';
 import 'package:owl_live_stats/views/details/team.dart';
 import 'package:owl_live_stats/views/details/player.dart';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:async_loader/async_loader.dart';
-import 'package:http/http.dart' as http;
 import 'package:owl_live_stats/data/net.dart';
-import 'package:owl_live_stats/values/strings.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:owl_live_stats/globals.dart';// as globals;
 
 class LiveTabWidget extends StatefulWidget
 {
-  BuildContext globalContext;
-  LiveTabWidget(BuildContext context) {
-    this.globalContext = context;
-  }
-  State<StatefulWidget> createState() => new LiveTabState(this.globalContext);
+  LiveTabWidget();
+  State<StatefulWidget> createState() => new LiveTabState();
 }
 
 class LiveTabState extends State<LiveTabWidget> {
@@ -30,14 +20,11 @@ class LiveTabState extends State<LiveTabWidget> {
   var network = new Net(environment);
   var singleton = Singleton();
   List<Map<String, dynamic>> schedule;
-  Match currentMatch;
+  CurrentMatch currentMatch;
   Map<String, dynamic> teams;
   Map<String, dynamic> players;
-  BuildContext globalContext;
 
-  LiveTabState(BuildContext context) {
-    this.globalContext = context;
-  }
+  LiveTabState();
 
   getData() {
     schedule = singleton.schedule.matches;
@@ -465,10 +452,10 @@ class LiveTabState extends State<LiveTabWidget> {
     return items;
   }
 
-  _getGameMapName(int index) {
-    return MAPS[_getGameMap(index)['map']];
-  }
-
+//  _getGameMapName(int index) {
+//    return MAPS[_getGameMap(index)['map']];
+//  }
+//
   _getGameMap(int index) {
     var match = _getMatch(); 
     return match['games'][index-1];
@@ -575,7 +562,7 @@ class LiveTabState extends State<LiveTabWidget> {
             children: <Widget>[
               new GestureDetector(
                 onTap: () {
-                  Navigator.of(this.globalContext).push(
+                  Navigator.of(globalContext).push(
                     new CupertinoPageRoute<void>(
                       builder: (BuildContext context) {
                         return new CupertinoPageScaffold(
@@ -594,7 +581,7 @@ class LiveTabState extends State<LiveTabWidget> {
                           ),
                           child: new Material(
                             type: MaterialType.transparency,
-                            child: new PlayerDetailWidget(_getLineupPlayers(playerIdsPair.first), this.globalContext),
+                            child: new PlayerDetailWidget(_getLineupPlayers(playerIdsPair.first), globalContext),
                           ),
                         );
                       },
@@ -663,7 +650,7 @@ class LiveTabState extends State<LiveTabWidget> {
               ),
               new GestureDetector(
                 onTap: () {
-                  Navigator.of(this.globalContext).push(
+                  Navigator.of(globalContext).push(
                     new CupertinoPageRoute<void>(
                       builder: (BuildContext context) {
                         return new CupertinoPageScaffold(
@@ -682,7 +669,7 @@ class LiveTabState extends State<LiveTabWidget> {
                           ),
                           child: new Material(
                             type: MaterialType.transparency,
-                            child: new PlayerDetailWidget(_getLineupPlayers(playerIdsPair.last), this.globalContext),
+                            child: new PlayerDetailWidget(_getLineupPlayers(playerIdsPair.last), globalContext),
                           ),
                         );
                       },

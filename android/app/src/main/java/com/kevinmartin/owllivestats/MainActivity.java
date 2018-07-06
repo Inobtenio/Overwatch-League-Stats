@@ -1,4 +1,4 @@
-package com.example.owllivestats;
+package com.kevinmartin.owllivestats;
 
 import android.os.Bundle;
 

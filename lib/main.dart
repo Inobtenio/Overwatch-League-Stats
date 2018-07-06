@@ -1,17 +1,10 @@
-import 'dart:async';
-import 'globals.dart' as globals;
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:owl_live_stats/homeScreen.dart';
-import 'package:owl_live_stats/models/match.dart';
-import 'package:owl_live_stats/values/strings.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 const env = "development"; //// Change to 'prduction' before deployment
 
 void main() async {
-  MaterialPageRoute.debugEnableFadingRoutes = true;
   runApp(new MyApp());
 }
 

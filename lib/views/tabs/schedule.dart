@@ -1,67 +1,42 @@
-import 'dart:async';
 import 'package:intl/intl.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:owl_live_stats/models/match.dart';
-import 'package:owl_live_stats/models/teams.dart';
-import 'package:owl_live_stats/models/players.dart';
-import 'package:owl_live_stats/models/schedule.dart';
 import 'package:owl_live_stats/views/details/team.dart';
-import 'package:owl_live_stats/views/details/player.dart';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:async_loader/async_loader.dart';
-import 'package:http/http.dart' as http;
 import 'package:owl_live_stats/data/net.dart';
-import 'package:owl_live_stats/values/strings.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:owl_live_stats/globals.dart';// as globals;
 
 class ScheduleTabWidget extends StatefulWidget
 {
-  BuildContext globalContext;
-  ScheduleTabWidget(BuildContext context) {
-    this.globalContext = context;
-  }
-  State<StatefulWidget> createState() => new ScheduleTabState(this.globalContext);
+  ScheduleTabWidget();
+  State<StatefulWidget> createState() => new ScheduleTabState();
 }
 
 class ScheduleTabState extends State<ScheduleTabWidget> {
 
-  BuildContext globalContext;
-
-  ScheduleTabState(BuildContext context) {
-    this.globalContext = context;
-  }
+  ScheduleTabState();
 
   @override
   Widget build(BuildContext context) {
     return new Container(
-      child: new MatchesListWidget(this.globalContext),
+      child: new MatchesListWidget(),
     );
   }
 }
 
 class MatchesListWidget extends StatefulWidget
 {
-  BuildContext globalContext;
-  MatchesListWidget(BuildContext context) {
-    this.globalContext = context;
-  }
-  State<StatefulWidget> createState() => new MatchesListState(this.globalContext);
+  MatchesListWidget();
+  State<StatefulWidget> createState() => new MatchesListState();
 }
 
 class MatchesListState extends State<MatchesListWidget> {
 
   var network = new Net(environment);
-  var singleton = Singleton();
-  Map<String, dynamic> teams = this.singleton.teams.teams;
-  List<Map<String, dynamic>> schedule = this.singleton.schedule.matches;
-  BuildContext globalContext;
+  static final singleton = Singleton();
+  Map<String, dynamic> teams = singleton.teams.teams;
+  List<Map<String, dynamic>> schedule = singleton.schedule.matches;
 
-  MatchesListState(BuildContext context) {
-    this.globalContext = context;
-  }
+  MatchesListState();
 
   void initState() {
     super.initState();
@@ -98,7 +73,6 @@ class MatchesListState extends State<MatchesListWidget> {
 
   _matchesListItems() {
     List<Widget> items = [];
-    int index = 1;
     var matches = _sortMatchesByStartTime();
     matches.forEach((match) {
       var contendants = [teams[match['teams'].first['id'].toString()], teams[match['teams'].last['id'].toString()]];
@@ -113,7 +87,7 @@ class MatchesListState extends State<MatchesListWidget> {
                   new Expanded(
                     child: new GestureDetector(
                       onTap: () {
-                        Navigator.of(this.globalContext).push(
+                        Navigator.of(globalContext).push(
                           new CupertinoPageRoute<void>(
                             builder: (BuildContext context) {
                               return new CupertinoPageScaffold(
@@ -132,7 +106,7 @@ class MatchesListState extends State<MatchesListWidget> {
                                 ),
                                 child: new Material(
                                   type: MaterialType.transparency,
-                                  child: new TeamDetailWidget(contendants.first, this.globalContext)
+                                  child: new TeamDetailWidget(contendants.first, globalContext)
                                 ),
                               );
                             },
@@ -171,7 +145,7 @@ class MatchesListState extends State<MatchesListWidget> {
                   new Expanded(
                     child: new GestureDetector(
                       onTap: () {
-                        Navigator.of(this.globalContext).push(
+                        Navigator.of(globalContext).push(
                           new CupertinoPageRoute<void>(
                             builder: (BuildContext context) {
                               return new CupertinoPageScaffold(
@@ -190,7 +164,7 @@ class MatchesListState extends State<MatchesListWidget> {
                                 ),
                                 child: new Material(
                                   type: MaterialType.transparency,
-                                  child: new TeamDetailWidget(contendants.last, this.globalContext)
+                                  child: new TeamDetailWidget(contendants.last, globalContext)
                                 ),
                               );
                             },
@@ -262,7 +236,6 @@ class MatchesListState extends State<MatchesListWidget> {
         element = new Container();
       }
       items.add(element);
-      index += 1;
     });
     if (items.length == 0) {
       return [new Center(

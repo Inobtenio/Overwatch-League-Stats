@@ -6,18 +6,19 @@ part of 'match.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Match _$MatchFromJson(Map<String, dynamic> json) => new Match(
-    id: json['id'] as String,
-    map_states: json['map_states'],
-    map_types: json['map_types'],
-    maps: json['maps'],
-    match_id: json['match_id'],
-    match_state: json['match_state'],
-    players: json['players'],
-    seen_players: json['seen_players'],
-    teams: json['teams']);
+CurrentMatch _$CurrentMatchFromJson(Map<String, dynamic> json) =>
+    new CurrentMatch(
+        id: json['id'] as String,
+        map_states: json['map_states'],
+        map_types: json['map_types'],
+        maps: json['maps'],
+        match_id: json['match_id'],
+        match_state: json['match_state'],
+        players: json['players'],
+        seen_players: json['seen_players'],
+        teams: json['teams']);
 
-abstract class _$MatchSerializerMixin {
+abstract class _$CurrentMatchSerializerMixin {
   String get id;
   dynamic get map_states;
   dynamic get map_types;

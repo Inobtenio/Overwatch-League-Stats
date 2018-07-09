@@ -11,7 +11,7 @@ class Net {
   final singleton = Singleton();
   var data;
   var env;
-  var authToken = "hz584ynr8wyug0tnajrps6d48hy0qk eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhbGxvd2VkX3N0YWdlIjoic2FuZGJveCIsImFwcF9pZCI6Imh6NTg0eW5yOHd5dWcwdG5hanJwczZkNDhoeTBxayIsImNoYW5uZWxfaWQiOiIyMzE2MTM1NyIsImV4cCI6MTUzMzEyNTM5Mywib3BhcXVlX3VzZXJfaWQiOiJBejg5MGVmN3FudmVxLTIzNTZoIiwicHVic3ViX3Blcm1zIjp7InNlbmQiOlsiKiJdfSwicm9sZSI6IiIsInVzZXJfaWQiOiIifQ.vjDyJKQyZH0AWvl21DxSMi061JakQ5GEbwtIB0yfxIc";
+  var jwt;
   
   Net(this.env) {}
 
@@ -27,28 +27,51 @@ class Net {
 //  }
 
   requestCall(String method, String url, Map<String, String> body, Map<String, String> headers) async {
+    var bodyString = json.encode(body);
     if (body != {}) {
       if (method == 'get') {
         return http.get(url, headers: headers);
       }
-      return http.post(url, body: body, headers: headers);
+      return http.post(url, body: bodyString, headers: headers);
     }
     if (method == 'get') {
       return http.get(url, headers: headers);
     }
-    return http.post(url, body: body, headers: headers);
+    return http.post(url, body: bodyString, headers: headers);
   }
 
   formURL(String path, Map<String, String> params) {
+    params['environment'] = singleton.environment;
     if (SETTINGS[env]['scheme'] == 'http') {
       return new Uri.http(SETTINGS[env]['host'], SETTINGS[env][path], params).toString();
     }
     return new Uri.https(SETTINGS[env]['host'], SETTINGS[env][path], params).toString();
   }
 
+  authToken() async {
+    Map<String, String> stringParams = {};
+    stringParams['app_id'] = appId;
+    stringParams['channel_id'] = channelId;
+    try {
+      final response = await request('auth_token_key', 'post', 'auth_url_path', {}, stringParams, {'Content-Type': 'application/json'});
+      jwt = appId + " " + json.decode(response.body)['token']; 
+    } catch (e) {
+      return;
+    }
+  }
+
+  environment() async {
+    try {
+      final response = await request('settings_preferences_key', 'get', 'settings_url_path', {}, {}, {});
+      singleton.environment = json.decode(response.body)['environment'];
+    } catch (e) {
+      return singleton.environment = 'stage';
+    }
+  }
+
   schedule() async {
     try {
-      final response = await request('schedule_preferences_key', 'get', 'schedule_url_path', {}, {}, {'Authorization': authToken});
+      final response = await request('schedule_preferences_key', 'get', 'schedule_url_path', {}, {}, {'Authorization': jwt});
       singleton.schedule = Schedule.fromJson(json.decode(response.body));
     } catch (e) {
       return singleton.schedule = Schedule.fromJson({'matches': []});
@@ -57,7 +80,7 @@ class Net {
 
   match() async {
     try {
-      final response = await request('match_preferences_key', 'get', 'match_url_path', {}, {}, {'Authorization': authToken});
+      final response = await request('match_preferences_key', 'get', 'match_url_path', {}, {}, {'Authorization': jwt});
       singleton.currentMatch = CurrentMatch.fromJson(json.decode(response.body));
     } catch (e) {
       return singleton.currentMatch = CurrentMatch.fromJson({'id': null});
@@ -66,7 +89,7 @@ class Net {
 
   teams(Map<String, String> params) async {
     try {
-      final response = await request('teams_preferences_key', 'get', 'teams_url_path', params, {}, {'Authorization': authToken});
+      final response = await request('teams_preferences_key', 'get', 'teams_url_path', params, {}, {'Authorization': jwt});
       singleton.teams = Teams.fromJson(json.decode(response.body));
     } catch (e) {
       return singleton.teams = Teams.fromJson({'teams': {}});
@@ -75,7 +98,7 @@ class Net {
 
   players(Map<String, String> params) async {
     try {
-      final response = await request('players_preferences_key', 'get', 'players_url_path', params, {}, {'Authorization': authToken});
+      final response = await request('players_preferences_key', 'get', 'players_url_path', params, {}, {'Authorization': jwt});
       singleton.players = Players.fromJson(json.decode(response.body));
     } catch (e) {
       return singleton.players = Players.fromJson({'players': {}});

@@ -17,8 +17,8 @@ class LiveTabWidget extends StatefulWidget
 
 class LiveTabState extends State<LiveTabWidget> {
 
-  var network = new Net(environment);
   var singleton = Singleton();
+  var network = new Net(environment);
   List<Map<String, dynamic>> schedule;
   CurrentMatch currentMatch;
   Map<String, dynamic> teams;
@@ -31,6 +31,14 @@ class LiveTabState extends State<LiveTabWidget> {
     currentMatch = singleton.currentMatch;
     teams = singleton.teams.teams;
     players = singleton.players.players;
+  }
+
+  fetchEnvironment() async {
+    await network.environment();
+  }
+
+  fetchAuthToken() async {
+    await network.authToken();
   }
 
   fetchSchedule() async {
@@ -50,12 +58,21 @@ class LiveTabState extends State<LiveTabWidget> {
   }
 
   playersIdsAsString() {
+    if (singleton.currentMatch.seen_players == null) {
+      return "";
+    }
     return singleton.currentMatch.seen_players.reduce((p, e) =>
           p..addAll(e)
         ).join(',');
   }
 
   process() async {
+    await fetchEnvironment();
+    await fetchAuthToken();
+    await dataToPoll();
+  }
+
+  dataToPoll() async {
     await fetchSchedule();
     await fetchMatch();
     await fetchTeams({'foo': 'bar'});
@@ -65,9 +82,9 @@ class LiveTabState extends State<LiveTabWidget> {
 
   void initState() {
     super.initState();
-    const oneSec = const Duration(seconds:20);
+    const oneSec = const Duration(seconds:5);
     new Timer.periodic(oneSec, (Timer t) => setState(() {
-      fetchMatch();
+      dataToPoll();
     }));
   }
 
@@ -105,7 +122,7 @@ class LiveTabState extends State<LiveTabWidget> {
   }
 
   _displayElements() {
-    if (currentMatch.id != "" && currentMatch.id != null) {
+    if (singleton.currentMatch.id != "" && singleton.currentMatch.id != null) {
       return new CupertinoPageScaffold(
         navigationBar: new CupertinoNavigationBar(
           middle: new Text(_getMatch()['state'] == "PENDING" ? "Current Match" : "Last Match - Finished"),
@@ -187,7 +204,7 @@ class LiveTabState extends State<LiveTabWidget> {
 
   _calculateGlobalScore() {
     var score = [0,0];
-    currentMatch.maps.forEach((el) {
+    singleton.currentMatch.maps.forEach((el) {
       el[0] > el[1] ? score[0] += 1 : score[1] += 1;
     });
     return score.join("-"); 
@@ -229,7 +246,7 @@ class LiveTabState extends State<LiveTabWidget> {
   }
 
   _calculateCurrentScore() {
-    return currentMatch.maps.last.join("-");
+    return singleton.currentMatch.maps.last.join("-");
   }
 
   _teamsRow() {
@@ -318,22 +335,22 @@ class LiveTabState extends State<LiveTabWidget> {
 
   _getTeams() {
     return {
-      'first': teams[currentMatch.teams.first.toString()],
-      'last': teams[currentMatch.teams.last.toString()],
+      'first': singleton.teams.teams[singleton.currentMatch.teams.first.toString()],
+      'last': singleton.teams.teams[singleton.currentMatch.teams.last.toString()],
     };
   }
 
   _getTeamsNames() {
     return {
-      'first': teams[currentMatch.teams.first.toString()]['name'].toString(),
-      'last': teams[currentMatch.teams.last.toString()]['name'].toString(),
+      'first': singleton.teams.teams[singleton.currentMatch.teams.first.toString()]['name'].toString(),
+      'last': singleton.teams.teams[singleton.currentMatch.teams.last.toString()]['name'].toString(),
     };
   }
 
   _getTeamsLogos() {
     return {
-      'first': 'images/team-' + currentMatch.teams.first.toString() + '-logo.png',
-      'last': 'images/team-' + currentMatch.teams.last.toString() + '-logo.png',
+      'first': 'images/team-' + singleton.currentMatch.teams.first.toString() + '-logo.png',
+      'last': 'images/team-' + singleton.currentMatch.teams.last.toString() + '-logo.png',
     };
   }
 
@@ -367,7 +384,7 @@ class LiveTabState extends State<LiveTabWidget> {
   _gameListItems() {
     List<Widget> items = [];
     var index = 1;
-    currentMatch.maps.forEach((map) {
+    singleton.currentMatch.maps.forEach((map) {
       var element = new Column(
         children: <Widget>[
           new Container(
@@ -417,7 +434,7 @@ class LiveTabState extends State<LiveTabWidget> {
 //                    children: <Widget>[
                       child: new Container(
                         alignment: Alignment(0.0, 0.0),
-                        child: new Image.asset("images/map_type_" + currentMatch.map_types[index-1] + ".png", width: 70.0)
+                        child: new Image.asset("images/map_type_" + singleton.currentMatch.map_types[index-1] + ".png", width: 70.0)
                       ),
 //                      new Container(
 //                        padding: EdgeInsets.only(
@@ -462,8 +479,8 @@ class LiveTabState extends State<LiveTabWidget> {
   }
 
   _getMatch() {
-    return schedule.singleWhere((match) {
-      return match['id'] == currentMatch.match_id;
+    return singleton.schedule.matches.singleWhere((match) {
+      return match['id'] == singleton.currentMatch.match_id;
     });
   }
 
@@ -494,7 +511,7 @@ class LiveTabState extends State<LiveTabWidget> {
 
   _getGameTitle(int index) {
     if (_getMatch()['state'] == "PENDING") {
-      if (index != currentMatch.maps.length) {
+      if (index != singleton.currentMatch.maps.length) {
         return "Game " + index.toString();
       };
       return "Current Game";
@@ -503,7 +520,7 @@ class LiveTabState extends State<LiveTabWidget> {
   }
 
   _gameListItemSeparator(int index) {
-    if (index != currentMatch.maps.length) {
+    if (index != singleton.currentMatch.maps.length) {
       return new Container(
         decoration: new BoxDecoration(
           color: Colors.black,//Color.fromARGB(200, 90, 90, 90),//Colors.white,
@@ -554,7 +571,7 @@ class LiveTabState extends State<LiveTabWidget> {
   _lineupsListItems() {
     List<Widget> items = [];
     for (var index = 0; index <= 5; index++) {
-      var playerIdsPair = [currentMatch.seen_players.first[index], currentMatch.seen_players.last[index]];
+      var playerIdsPair = [singleton.currentMatch.seen_players.first[index], singleton.currentMatch.seen_players.last[index]];
       var element = new Column(
         children: <Widget>[
           new Row(
@@ -767,11 +784,11 @@ class LiveTabState extends State<LiveTabWidget> {
   }
 
   _getCurrentPlayerHero(int id) {
-    var hero = currentMatch.players[id.toString()]["hero"];
+    var hero = singleton.currentMatch.players[id.toString()]["hero"];
     return 'https://d1u1mce87gyfbn.cloudfront.net/hero/' + hero + '/icon-right-menu.png';
   }
 
   _getLineupPlayers(int id) {
-    return players[id.toString()];
+    return singleton.players.players[id.toString()];
   }
 }

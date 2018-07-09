@@ -9,6 +9,9 @@ import 'package:owl_live_stats/models/schedule.dart';
 var globalContext;
 var orangeColor = Color.fromARGB(210, 240, 150, 60);
 var environment = 'stage';
+var channelId = "23161357";
+var appId = "hz584ynr8wyug0tnajrps6d48hy0qk";
+var authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhbGxvd2VkX3N0YWdlIjoic2FuZGJveCIsImFwcF9pZCI6Imh6NTg0eW5yOHd5dWcwdG5hanJwczZkNDhoeTBxayIsImNoYW5uZWxfaWQiOiIyMzE2MTM1NyIsImV4cCI6MTUzMzEyNTM5Mywib3BhcXVlX3VzZXJfaWQiOiJBejg5MGVmN3FudmVxLTIzNTZoIiwicHVic3ViX3Blcm1zIjp7InNlbmQiOlsiKiJdfSwicm9sZSI6IiIsInVzZXJfaWQiOiIifQ.vjDyJKQyZH0AWvl21DxSMi061JakQ5GEbwtIB0yfxIc";
 const MAPS = {
   'blizzard-world': 'Blizzard World',
   'dorado': 'Dorado',
@@ -35,12 +38,13 @@ Color colorFromHex(String code) {
 }
 
 class Singleton {
+  var environment = 'stage';
+  var authToken = '';
   static final Singleton _singleton = new Singleton._internal();
   CurrentMatch currentMatch;
   Teams teams;
   Players players;
   Schedule schedule;
-  String authToken;
 
   factory Singleton() {
     return _singleton;

@@ -250,6 +250,14 @@ class MatchesListState extends State<MatchesListWidget> {
 
   _sortMatchesByStartTime() {
     List<dynamic> list = schedule.toList();
+    Map<int, dynamic> map = {};
+    list.retainWhere((item) => item['games'].length > 0);
+    list.sort((a, b) => _getMatchTime(a).compareTo(_getMatchTime(b)));
+    list.forEach((item) {
+      var key = item['teams'][0]['id'] + item['teams'][1]['id'];
+      map[key] = item;
+    });
+    list = map.values.toList();
     list.sort((a, b) => _getMatchTime(a).compareTo(_getMatchTime(b)));
     return list;
   }

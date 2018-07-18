@@ -105,6 +105,15 @@ class Net {
     }
   }
 
+  teamPlayers(Map<String, String> params) async {
+    try {
+      final response = await request('players_preferences_key', 'get', 'players_url_path', params, {}, {'Authorization': jwt});
+      singleton.teamPlayers = Players.fromJson(json.decode(response.body));
+    } catch (e) {
+      return singleton.teamPlayers = Players.fromJson({'players': {}});
+    }
+  }
+
   request(String key, String method, String path, Map<String, String> params,  Map<String, String> body, Map<String, String> headers) async {
     var url = formURL(path, params);
     return requestCall(method, url, body, headers);

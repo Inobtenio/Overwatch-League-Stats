@@ -15,6 +15,7 @@ dependencies:
   async_loader: 0.1.1
   cached_network_image: ^0.4.1
   intl: ^0.15.6
+  flutter_local_notifications: ^0.3.4
 
 
 dev_dependencies:
@@ -89,13 +90,14 @@ flutter:
     - images/maps/rialto.jpg
     - images/maps/route-66.jpg
     - images/maps/temple-of-anubis.jpg
-    - images/maps/volskaya-industries.jpg
+    - images/maps/volskaya.jpg
     - images/roles/support.png
     - images/roles/tank.png
     - images/roles/offense.png
     - images/roles/flex.png
   ## Icons
     - images/battle-icon.png
+    - images/crown.png
 
   #  - images/a_dot_ham.jpeg
 

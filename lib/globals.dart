@@ -30,7 +30,7 @@ const MAPS = {
   'rialto': 'Rialto',
   'route-66': 'Route 66',
   'temple-of-anubis': 'Temple of Anubis',
-  'volskaya-industries': 'Volskaya Industries',
+  'volskaya': 'Volskaya Industries',
 };
 
 Color colorFromHex(String code) {
@@ -44,6 +44,7 @@ class Singleton {
   CurrentMatch currentMatch;
   Teams teams;
   Players players;
+  Players teamPlayers;
   Schedule schedule;
 
   factory Singleton() {

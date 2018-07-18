@@ -54,6 +54,7 @@ class LiveTabState extends State<LiveTabWidget> {
   }
 
   fetchPlayers(Map<String, String> params) async {
+    var network = new Net('production');
     await network.players(params);
   }
 
@@ -204,9 +205,15 @@ class LiveTabState extends State<LiveTabWidget> {
 
   _calculateGlobalScore() {
     var score = [0,0];
-    singleton.currentMatch.maps.forEach((el) {
-      el[0] > el[1] ? score[0] += 1 : score[1] += 1;
-    });
+    for (var index = 0; index < singleton.currentMatch.maps.length; index++) {
+      if (singleton.currentMatch.map_states[index] == 'CONCLUDED') {
+        if (singleton.currentMatch.maps[index][0] > singleton.currentMatch.maps[index][1]) {
+          score[0] += 1;
+        } else if (singleton.currentMatch.maps[index][1] > singleton.currentMatch.maps[index][0]) {
+          score[1] += 1;
+        }
+      }
+    }
     return score.join("-"); 
   }
 
@@ -568,10 +575,29 @@ class LiveTabState extends State<LiveTabWidget> {
     );
   }
 
+  _getPlayerIdsPairs() {
+    var playerIds = singleton.currentMatch.players.keys.toList();
+    var firstGroup = [];
+    var secondGroup = [];
+    var result = [];
+    playerIds.forEach((playerId) {
+      var player = singleton.players.players[playerId];
+      if (player['team_id'] == singleton.currentMatch.teams.first) {
+        firstGroup.add(playerId);
+      } else if (player['team_id'] == singleton.currentMatch.teams.last) {
+        secondGroup.add(playerId);
+      }
+    });
+    for (var index = 0; index <= 5; index++) {
+      result.add([firstGroup[index], secondGroup[index]]);
+    };
+    return result;
+  }
+
   _lineupsListItems() {
     List<Widget> items = [];
-    for (var index = 0; index <= 5; index++) {
-      var playerIdsPair = [singleton.currentMatch.seen_players.first[index], singleton.currentMatch.seen_players.last[index]];
+    var index = 0;
+    _getPlayerIdsPairs().forEach((playerIdsPair) {
       var element = new Column(
         children: <Widget>[
           new Row(
@@ -758,8 +784,9 @@ class LiveTabState extends State<LiveTabWidget> {
           _lineupsListItemSeparator(index),
         ],
       );
+      index += 1;
       items.add(element);
-    };
+    });
     return items;
   }
 
@@ -783,12 +810,12 @@ class LiveTabState extends State<LiveTabWidget> {
     return new Container();
   }
 
-  _getCurrentPlayerHero(int id) {
-    var hero = singleton.currentMatch.players[id.toString()]["hero"];
+  _getCurrentPlayerHero(String id) {
+    var hero = singleton.currentMatch.players[id]["hero"];
     return 'https://d1u1mce87gyfbn.cloudfront.net/hero/' + hero + '/icon-right-menu.png';
   }
 
-  _getLineupPlayers(int id) {
-    return singleton.players.players[id.toString()];
+  _getLineupPlayers(String id) {
+    return singleton.players.players[id];
   }
 }

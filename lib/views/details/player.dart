@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:owl_live_stats/models/match.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,8 @@ class PlayerDetailState extends State<PlayerDetailWidget> {
 
   void initState() {
     super.initState();
+    const oneSec = const Duration(seconds:1);
+    new Timer.periodic(oneSec, (Timer t) => setState(() { }));
   }
 
   @override
@@ -203,40 +206,42 @@ class PlayerDetailState extends State<PlayerDetailWidget> {
   }
 
   _playerCurrentStats() {
-    if (currentMatch.seen_players.reduce((p, e) => p..addAll(e)).indexOf(player['id']) != -1 ) {
-      return new Container(
-        padding: EdgeInsets.only(
-          right: 10.0,
-          left: 10.0,
-        ),
-        child: new Column(
-          children: <Widget>[
-            _playerCurrentStatsListItem('Best kill streak', 'best_kill_streak'),
-            _playerInfoListItemSeparator(),
-            _playerCurrentStatsListItem('Deaths', 'deaths'),
-            _playerInfoListItemSeparator(),
-            _playerCurrentStatsListItem('Defensive assists', 'defensive_assists'),
-            _playerInfoListItemSeparator(),
-            _playerCurrentStatsListItem('Eliminations', 'eliminations'),
-            _playerInfoListItemSeparator(),
-            _playerCurrentStatsListItem('Final blows', 'final_blows'),
-            _playerInfoListItemSeparator(),
-            _playerCurrentStatsListItem('Healing done', 'healing_done'),
-            _playerInfoListItemSeparator(),
-            _playerSpecialListItemFor('Hero', [currentMatch.players[player['id'].toString()]['hero']]),
-            _playerInfoListItemSeparator(),
-            _playerCurrentStatsListItem('Hero damage done', 'hero_damage_done'),
-            _playerInfoListItemSeparator(),
-            _playerCurrentStatsListItem('Objective kills', 'objective_kills'),
-            _playerInfoListItemSeparator(),
-            _playerCurrentStatsListItem('Offensive assists', 'offensive_assists'),
-            _playerInfoListItemSeparator(),
-            _playerCurrentStatsListItem('Solo kills', 'solo_kills'),
-            _playerInfoListItemSeparator(),
-            _playerCurrentStatsListItem('Weapon accuracy', 'weapon_accuracy'),
-          ],
-        ),
-      );
+    if (currentMatch.seen_players != null) {
+      if (currentMatch.seen_players.reduce((p, e) => p..addAll(e)).indexOf(player['id']) != -1 ) {
+        return new Container(
+          padding: EdgeInsets.only(
+            right: 10.0,
+            left: 10.0,
+          ),
+          child: new Column(
+            children: <Widget>[
+              _playerCurrentStatsListItem('Best kill streak', 'best_kill_streak'),
+              _playerInfoListItemSeparator(),
+              _playerCurrentStatsListItem('Deaths', 'deaths'),
+              _playerInfoListItemSeparator(),
+              _playerCurrentStatsListItem('Defensive assists', 'defensive_assists'),
+              _playerInfoListItemSeparator(),
+              _playerCurrentStatsListItem('Eliminations', 'eliminations'),
+              _playerInfoListItemSeparator(),
+              _playerCurrentStatsListItem('Final blows', 'final_blows'),
+              _playerInfoListItemSeparator(),
+              _playerCurrentStatsListItem('Healing done', 'healing_done'),
+              _playerInfoListItemSeparator(),
+              _playerSpecialListItemFor('Hero', [currentMatch.players[player['id'].toString()]['hero']]),
+              _playerInfoListItemSeparator(),
+              _playerCurrentStatsListItem('Hero damage done', 'hero_damage_done'),
+              _playerInfoListItemSeparator(),
+              _playerCurrentStatsListItem('Objective kills', 'objective_kills'),
+              _playerInfoListItemSeparator(),
+              _playerCurrentStatsListItem('Offensive assists', 'offensive_assists'),
+              _playerInfoListItemSeparator(),
+              _playerCurrentStatsListItem('Solo kills', 'solo_kills'),
+              _playerInfoListItemSeparator(),
+              _playerCurrentStatsListItem('Weapon accuracy', 'weapon_accuracy'),
+            ],
+          ),
+        );
+      }
     }
     return new Center(
       child: Container(
@@ -327,7 +332,7 @@ class PlayerDetailState extends State<PlayerDetailWidget> {
   }
 
   _playerCurrentStatsListItemFormatter(String key) {
-    var numericValue = currentMatch.players[player['id'].toString()][key];
+    var numericValue = singleton.currentMatch.players[player['id'].toString()][key];
     if (numericValue.floor() == numericValue) {
       return numericValue.toString();
     } else if (numericValue >= 1.0) {

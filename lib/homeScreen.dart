@@ -1,4 +1,4 @@
-import 'package:owl_live_stats/globals.dart';// as globals;
+import 'package:owl_live_stats/globals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -6,7 +6,7 @@ import 'package:owl_live_stats/values/strings.dart';
 import 'package:owl_live_stats/widgets/tabs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const env = "development"; //// Change to 'prduction' before deployment
+const env = "development"; /// Change to 'prduction' before deployment
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -40,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    //process();
     super.initState();
   }
 
@@ -63,10 +62,6 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: new Icon(Icons.today),
               title: new Text("Schedule")
           ),
-//          new BottomNavigationBarItem(
-//              icon: new Icon(Icons.settings),
-//              title: new Text("Settings")
-//          ),
         ],
         backgroundColor: Colors.white
       ),

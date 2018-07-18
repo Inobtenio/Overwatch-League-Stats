@@ -89,11 +89,11 @@ class TeamPlayersState extends State<TeamPlayersWidget> {
   TeamPlayersState(this.team, this.globalContext);
 
   fetchPlayers(Map<String, String> params) async {
-    await network.players(params);
+    await network.teamPlayers(params);
   }
 
   getData() {
-      players = singleton.players.players;
+      players = singleton.teamPlayers.players;
   }
 
   playersIdsAsString() {
